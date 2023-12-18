@@ -1,0 +1,31 @@
+{
+  "name": "tin-can-phone",
+  "version": "0.0.0",
+  "description": "RPC over WebSockets",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.mjs",
+    "lint": "eslint --config .eslintrc.js *.mjs tests/*.mjs && standard-version --dry-run",
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major",
+    "prepare": "husky install"
+  },
+  "keywords": [],
+  "author": "Juergen Fitschen <me@jue.yt>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jue89/node-tin-can-phone.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jue89/node-tin-can-phone/issues"
+  },
+  "homepage": "https://github.com/jue89/node-tin-can-phone#readme",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "husky": "^8.0.3",
+    "standard-version": "^9.5.0"
+  }
+}
