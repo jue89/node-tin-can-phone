@@ -26,13 +26,13 @@ describe('initSession', () => {
 		const a = {afn: mock.fn()};
 		const b = {bfn: mock.fn()};
 		const [sa, sb] = await Promise.all([
-			initSession({send: defer(ab.send), recv: ba.recv, local: a}),
-			initSession({send: defer(ba.send), recv: ab.recv, local: b}),
+			initSession({send: defer(ab.send), recv: ba.recv, localProxy: a, isServer: false}),
+			initSession({send: defer(ba.send), recv: ab.recv, localProxy: b, isServer: true}),
 		]);
-		assert.equal(sa.local, a);
-		assert.equal(sb.local, b);
-		await sa.remote.bfn();
-		await sb.remote.afn();
+		assert.equal(sa.localProxy, a);
+		assert.equal(sb.localProxy, b);
+		await sa.remoteProxy.bfn();
+		await sb.remoteProxy.afn();
 		assert.equal(a.afn.mock.callCount(), 1);
 		assert.equal(b.bfn.mock.callCount(), 1);
 	});
@@ -43,8 +43,8 @@ describe('initSession', () => {
 		const eva = observer();
 		const evb = observer();
 		const [sa, sb] = await Promise.all([
-			initSession({send: defer(ab.send), recv: ba.recv, onEvent: eva}),
-			initSession({send: defer(ba.send), recv: ab.recv, onEvent: evb}),
+			initSession({send: defer(ab.send), recv: ba.recv, onEvent: eva, isServer: false}),
+			initSession({send: defer(ba.send), recv: ab.recv, onEvent: evb, isServer: true}),
 		]);
 		sa.emitEvent('foo', 1, 2);
 		sb.emitEvent('bar', 3, 4);
