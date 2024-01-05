@@ -58,6 +58,8 @@ describe('genCaller() / genCallee()', () => {
 		const b = genBus();
 		genCallee({}, {recv: a.recv, send: b.send});
 		const sendAndRecv = genDialog({recv: b.recv, send: a.send});
+		a.send(['req', true]);
+		a.send(['req', 'a', true]);
 		assert.deepEqual(await sendAndRecv(['req', 'a', 1]), ['rsp', 'a', 1, 'err', new Error('Parameter must be an array')]);
 		assert.deepEqual(await sendAndRecv(['req', 'a', 1, []]), ['rsp', 'a', 1, 'err', new Error('Method \'a\' not implemented')]);
 	});

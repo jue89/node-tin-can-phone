@@ -33,7 +33,7 @@ export function genCallee (obj, {send, recv}) {
 	}
 
 	recv([REQ], (args) => {
-		callMethod(args).then((result) => send(result));
+		callMethod(args).then((result) => result && send(result));
 	});
 }
 
