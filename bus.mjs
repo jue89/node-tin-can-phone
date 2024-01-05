@@ -1,3 +1,5 @@
+import assert from './assert.mjs';
+
 function arrMatch (needle, candidate) {
 	for (let [idx, val] of needle.entries()) {
 		if (candidate[idx] != val) return false;
@@ -24,6 +26,7 @@ export function genBus (logSend = () => {}) {
 
 	function send (args) {
 		logSend(args);
+		assert(Array.isArray(args), 'args must be an array');
 		listeners = listeners.filter(([filter, cb]) => {
 			if (!arrMatch(filter, args)) return true;
 			const remove = cb(args.slice(filter.length));
