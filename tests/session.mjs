@@ -26,13 +26,13 @@ describe('initSession', () => {
 		const a = {afn: mock.fn()};
 		const b = {bfn: mock.fn()};
 		const [sa, sb] = await Promise.all([
-			initSession({send: defer(ab.send), recv: ba.recv, localProxy: a, isServer: false}),
-			initSession({send: defer(ba.send), recv: ab.recv, localProxy: b, isServer: true}),
+			initSession({send: defer(ab.send), recv: ba.recv, proxy: a, isServer: false}),
+			initSession({send: defer(ba.send), recv: ab.recv, proxy: b, isServer: true}),
 		]);
-		assert.equal(sa.localProxy, a);
-		assert.equal(sb.localProxy, b);
-		await sa.remoteProxy.bfn();
-		await sb.remoteProxy.afn();
+		assert.equal(sa.proxy, a);
+		assert.equal(sb.proxy, b);
+		await sa.call.bfn();
+		await sb.call.afn();
 		assert.equal(a.afn.mock.callCount(), 1);
 		assert.equal(b.bfn.mock.callCount(), 1);
 	});

@@ -2,25 +2,25 @@ import {REG} from './types.mjs';
 import {getMethods, genCallee, genCaller} from './rpc.mjs';
 import {attachEventListener, genEventEmitter} from './events.mjs';
 
-export async function initSession ({send, recv, localProxy, onEvent, isServer}) {
-	localProxy ||= {};
+export async function initSession ({send, recv, proxy, onEvent, isServer}) {
+	proxy ||= {};
 	onEvent ||= () => {};
 
 	// Setup and exchange RPC methods
-	genCallee(localProxy, {send, recv});
+	genCallee(proxy, {send, recv});
 	let remoteMethods;
 	if (isServer) {
-		send([REG, ...getMethods(localProxy)]);
+		send([REG, ...getMethods(proxy)]);
 		remoteMethods = await recv([REG]);
 	} else {
 		remoteMethods = await recv([REG]);
-		send([REG, ...getMethods(localProxy)]);
+		send([REG, ...getMethods(proxy)]);
 	}
-	const remoteProxy = genCaller(remoteMethods, {send, recv});
+	const call = genCaller(remoteMethods, {send, recv});
 
 	// Setup event bus
 	attachEventListener(onEvent, {recv});
 	const emitEvent = genEventEmitter({send});
 
-	return {localProxy, remoteProxy, emitEvent};
+	return {proxy, call, emitEvent};
 }
