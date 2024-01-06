@@ -1,12 +1,12 @@
 import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
-import {genSerializer} from './serialize.mjs';
+import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
 
 assert(WebSocket);
 
-export async function connectTinCan ({url, customTypes, onEvent, proxy, onDisconnect}) {
-	const {parse, stringify} = genSerializer(customTypes);
+export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onDisconnect}) {
+	const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
 
 	const ws = new WebSocket(url);
 

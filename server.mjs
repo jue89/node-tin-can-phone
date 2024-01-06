@@ -1,7 +1,7 @@
 import {WebSocketServer} from 'ws';
 import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
-import {genSerializer} from './serialize.mjs';
+import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
 
 function retriggerableTimeout (fn, delay) {
@@ -31,7 +31,7 @@ export class TinCanServer {
 
 		this.sessions = [];
 
-		const {parse, stringify} = genSerializer(customTypes);
+		const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
 
 		const wss = new WebSocketServer({server});
 		wss.on('connection', async (ws, connection) => {
