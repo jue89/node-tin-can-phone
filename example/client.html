@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Tin Can Example</title>
+	<script type="module">
+		import {connectTinCan} from '../client.mjs';
+		const session = await connectTinCan({
+			url: 'ws://localhost:8080'
+		});
+		console.log('session');
+		await session.call.say(await session.call.echo('hi'));
+	</script>
+</head>
+<body>
+	<p>Noting to see ... check the server's output.</p>
+</body>
+</html>

@@ -12,7 +12,8 @@
     "release:major": "standard-version --release-as major",
     "prepare": "husky install",
     "example-server": "node example/server.mjs",
-    "example-client": "node example/client.mjs"
+    "example-client": "node example/client.mjs",
+    "example-browser": "http-server -p 8081 -o example/client.html ."
   },
   "keywords": [],
   "author": "Juergen Fitschen <me@jue.yt>",
@@ -27,6 +28,7 @@
   "homepage": "https://github.com/jue89/node-tin-can-phone#readme",
   "devDependencies": {
     "eslint": "^8.56.0",
+    "http-server": "^14.1.1",
     "husky": "^8.0.3",
     "standard-version": "^9.5.0"
   },
