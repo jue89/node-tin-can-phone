@@ -5,11 +5,96 @@
 	<title>Tin Can Example</title>
 	<script type="module">
 		import {connectTinCan} from '../client.mjs';
+
+		class Challenge {
+			static unpack (obj) {
+				return new Uint8Array(obj);
+			}
+		}
+
+		class CredentialCreationOptions {
+			static unpack (obj) {
+				return new CredentialCreationOptions(obj);
+			}
+
+			constructor (obj) {
+				Object.assign(this, obj);
+				this.publicKey.user.id = new Uint8Array(this.publicKey.user.id);
+			}
+		}
+
+		class PublicKeyCredentialDescriptor {
+			static unpack (obj) {
+				return new PublicKeyCredentialDescriptor({
+					type: obj.type,
+					id: new Uint8Array(obj.id),
+				});
+			}
+
+			constructor ({type, id}) {
+				this.type = type;
+				this.id = id;
+			}
+		}
+
+		class CredentialRequestOptions {
+			static unpack (obj) {
+				return new CredentialRequestOptions(obj);
+			}
+
+			constructor (obj) {
+				Object.assign(this, obj);
+			}
+		}
+
+		function packPublicKeyCredential (cred) {
+			return {
+				id: Array.from(new Uint8Array(cred.rawId)),
+				response: cred.response
+			}
+		}
+
+		function packAuthenticatorAttestationResponse (response) {
+			const text = new TextDecoder('utf-8');
+			return {
+				authenticatorData: Array.from(new Uint8Array(response.getAuthenticatorData())),
+				clientDataJSON: text.decode(new Uint8Array(response.clientDataJSON)),
+				publicKeyAlg: response.getPublicKeyAlgorithm(),
+				publicKey: Array.from(new Uint8Array(response.getPublicKey()))
+			};
+		}
+
+		function packAuthenticatorAssertionResponse (response) {
+			const text = new TextDecoder('utf-8');
+			return {
+				authenticatorData: Array.from(new Uint8Array(response.authenticatorData)),
+				clientDataJSON: text.decode(new Uint8Array(response.clientDataJSON)),
+				signature: Array.from(new Uint8Array(response.signature)),
+			};
+		}
+
 		const session = await connectTinCan({
-			url: 'ws://localhost:8080'
+			url: 'ws://localhost:8080',
+			customTypes: [
+				{cls: Challenge},
+				{cls: CredentialCreationOptions},
+				{cls: PublicKeyCredential, pack: packPublicKeyCredential},
+				{cls: AuthenticatorAttestationResponse, pack: packAuthenticatorAttestationResponse},
+				{cls: AuthenticatorAssertionResponse, pack: packAuthenticatorAssertionResponse},
+				{cls: PublicKeyCredentialDescriptor},
+				{cls: CredentialRequestOptions},
+			]
 		});
-		console.log('session');
-		await session.call.say(await session.call.echo('hi'));
+
+		const cred = await navigator.credentials.create(await session.call.startReg('alice', {admin: true}));
+		console.log(cred);
+		await session.call.finishReg(cred);
+
+		const reqOpts = await session.call.startLogin('alice');
+		console.log(reqOpts);
+		const req = await navigator.credentials.get(reqOpts);
+		console.log(req);
+		console.log(await session.call.finishLogin(req));
 	</script>
 </head>
 <body>
