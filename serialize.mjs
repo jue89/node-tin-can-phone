@@ -16,27 +16,35 @@ export const defaultTypes = [{
 	fromJSON: (x) => new Set(x),
 }];
 
-function isDict (obj) {
-	return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+function isDict (x) {
+	return typeof x === 'object' && x !== null && !Array.isArray(x);
 }
 
 export function genSerializer (converter = []) {
+	function tryToJSON (value) {
+		const conv = converter.find((c) => value instanceof c.cls);
+		if (!conv) return value;
+		return {
+			type: conv.cls.name,
+			value: conv.toJSON(value)
+		};
+	}
+
 	function stringify (obj) {
 		return JSON.stringify(obj, (key, value) => {
-			if (!isDict(value)) return value;
-
-			/* We have to look inside the object before JSON.stringify calls the Class' toJSON() method
-			 * instead of the given one ... */
-			return Object.fromEntries(Object.entries(value).map(([key, value]) => {
-				const conv = converter.find((c) => value instanceof c.cls);
-				if (conv) {
-					value = {
-						type: conv.cls.name,
-						value: conv.toJSON(value)
-					};
-				}
-				return [key, value];
-			}));
+			/* We have to look inside the objects and arrays before JSON.stringify
+			 * calls the Classes toJSON() method instead of the given one ... */
+			if (isDict(value)) {
+				return Object.fromEntries(Object.entries(value).map(([key, value]) => {
+					return [key, tryToJSON(value)];
+				}));
+			} else if (Array.isArray(value)) {
+				return value.map((value) => {
+					return tryToJSON(value);
+				});
+			} else {
+				return value;
+			}
 		});
 	}
 

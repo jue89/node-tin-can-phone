@@ -24,11 +24,14 @@ describe('genSerializer()', () => {
 		const {stringify, parse} = genSerializer([{cls: MyType, toJSON: (x) => x.foo, fromJSON: (x) => new MyType(x)}]);
 
 		const src = {
-			myType: new MyType('bar')
+			myType: new MyType('bar'),
+			foo: [new MyType('bar')]
 		};
 		const dst = parse(stringify(src));
 		assert(dst.myType instanceof MyType);
-		assert.equal(src.foo, dst.foo);
+		assert(dst.foo[0] instanceof MyType);
+		assert.deepEqual(src.myType, dst.myType);
+		assert.deepEqual(src.foo[0], dst.foo[0]);
 	});
 });
 
