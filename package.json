@@ -10,7 +10,9 @@
     "release:minor": "standard-version --release-as minor",
     "release:patch": "standard-version --release-as patch",
     "release:major": "standard-version --release-as major",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "example-server": "node example/server.mjs",
+    "example-client": "node example/client.mjs"
   },
   "keywords": [],
   "author": "Juergen Fitschen <me@jue.yt>",
