@@ -2,7 +2,14 @@
   "name": "tin-can-phone",
   "version": "0.0.0",
   "description": "RPC over WebSockets",
-  "main": "index.js",
+  "exports": {
+    "./server": "./server.mjs",
+    "./client": {
+      "node": "./client-node.mjs",
+      "default": "./client.mjs"
+    },
+    "./serialize": "./serialize.mjs"
+  },
   "scripts": {
     "test": "node --test tests/*.mjs",
     "lint": "eslint --config .eslintrc.js *.mjs tests/*.mjs && standard-version --dry-run",
