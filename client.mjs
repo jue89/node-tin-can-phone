@@ -19,7 +19,9 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 		try {
 			const msg = parse(evt.data);
 			pipe.send(msg);
-		} catch (e) { /* NOP */ }
+		} catch (err) {
+			console.error('Cannot decode ingress message', err);
+		}
 	});
 	const ingress = pipe.recv;
 	const outgress = (msg) => ws.send(stringify(msg));
@@ -32,7 +34,8 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 		recv: ingress,
 		send: outgress,
 		proxy,
-		onEvent
+		onEvent,
+		logErr: console.error
 	});
 
 	return {...session, close};

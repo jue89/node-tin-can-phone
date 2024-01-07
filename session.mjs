@@ -2,12 +2,12 @@ import {REG} from './types.mjs';
 import {getMethods, genCallee, genCaller} from './rpc.mjs';
 import {attachEventListener, genEventEmitter} from './events.mjs';
 
-export async function initSession ({send, recv, proxy, onEvent, isServer}) {
+export async function initSession ({send, recv, proxy, onEvent, isServer, logErr}) {
 	proxy ||= {};
 	onEvent ||= () => {};
 
 	// Setup and exchange RPC methods
-	genCallee(proxy, {send, recv});
+	genCallee(proxy, {send, recv}, logErr);
 	let remoteMethods;
 	if (isServer) {
 		send([REG, ...getMethods(proxy)]);

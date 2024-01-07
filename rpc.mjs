@@ -17,7 +17,7 @@ export function getMethods (obj) {
 	}
 }
 
-export function genCallee (obj, {send, recv}) {
+export function genCallee (obj, {send, recv}, logErr = (() => {})) {
 	async function callMethod ([name, id, params]) {
 		/* silently ignore everything that's not addressable */
 		if (typeof name !== 'string') return;
@@ -28,6 +28,7 @@ export function genCallee (obj, {send, recv}) {
 			assert(typeof obj[name] === 'function', `Method '${name}' not implemented`);
 			return [RSP, name, id, RSP_OK, await obj[name](...params)];
 		} catch (err) {
+			logErr(err);
 			return [RSP, name, id, RSP_ERR, err];
 		}
 	}

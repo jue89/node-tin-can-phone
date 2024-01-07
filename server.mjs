@@ -1,8 +1,11 @@
 import {WebSocketServer} from 'ws';
+import {debuglog} from 'node:util';
 import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
 import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
+
+const debug = debuglog('tincan');
 
 function retriggerableTimeout (fn, delay) {
 	let handle;
@@ -46,7 +49,9 @@ export class TinCanServer {
 				try {
 					msg = parse(msg);
 					pipe.send(msg);
-				} catch (e) { /* NOP */ }
+				} catch (err) {
+					debug('Cannot decode ingress message: %s', err.stack);
+				}
 			});
 			const ingress = pipe.recv;
 			const outgress = (msg) => ws.send(stringify(msg));
@@ -74,7 +79,8 @@ export class TinCanServer {
 						recv: ingress,
 						send: outgress,
 						proxy,
-						onEvent
+						onEvent,
+						logErr: debug
 					}),
 					connection,
 					close

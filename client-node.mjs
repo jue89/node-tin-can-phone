@@ -1,7 +1,10 @@
 import {WebSocket} from 'ws';
+import {debuglog} from 'node:util';
 import {genBus} from './bus.mjs';
 import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
+
+const debug = debuglog('tincan');
 
 export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onDisconnect}) {
 	const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
@@ -17,7 +20,9 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 		try {
 			msg = parse(msg);
 			pipe.send(msg);
-		} catch (e) { /* NOP */ }
+		} catch (err) {
+			debug('Cannot decode ingress message: %s', err.stack);
+		}
 	});
 	const ingress = pipe.recv;
 	const outgress = (msg) => ws.send(stringify(msg));
@@ -30,7 +35,8 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 		recv: ingress,
 		send: outgress,
 		proxy,
-		onEvent
+		onEvent,
+		logErr: debug
 	});
 
 	return {...session, close};
