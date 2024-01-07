@@ -1,19 +1,19 @@
 export const defaultTypes = [{
 	cls: Date,
-	toJSON: (x) => x.toISOString(),
-	fromJSON: (x) => new Date(x),
+	pack: (x) => x.toISOString(),
+	unpack: (x) => new Date(x),
 }, {
 	cls: Error,
-	toJSON: (x) => x.message,
-	fromJSON: (x) => new Error(x),
+	pack: (x) => x.message,
+	unpack: (x) => new Error(x),
 }, {
 	cls: Map,
-	toJSON: (x) => [...x.entries()],
-	fromJSON: (x) => new Map(x),
+	pack: (x) => [...x.entries()],
+	unpack: (x) => new Map(x),
 }, {
 	cls: Set,
-	toJSON: (x) => [...x.values()],
-	fromJSON: (x) => new Set(x),
+	pack: (x) => [...x.values()],
+	unpack: (x) => new Set(x),
 }];
 
 function isDict (x) {
@@ -21,12 +21,12 @@ function isDict (x) {
 }
 
 export function genSerializer (converter = []) {
-	function tryToJSON (value) {
+	function tryPack (value) {
 		const conv = converter.find((c) => value instanceof c.cls);
 		if (!conv) return value;
 		return {
 			type: conv.cls.name,
-			value: conv.toJSON(value)
+			value: conv.pack(value)
 		};
 	}
 
@@ -36,11 +36,11 @@ export function genSerializer (converter = []) {
 			 * calls the Classes toJSON() method instead of the given one ... */
 			if (isDict(value)) {
 				return Object.fromEntries(Object.entries(value).map(([key, value]) => {
-					return [key, tryToJSON(value)];
+					return [key, tryPack(value)];
 				}));
 			} else if (Array.isArray(value)) {
 				return value.map((value) => {
-					return tryToJSON(value);
+					return tryPack(value);
 				});
 			} else {
 				return value;
@@ -55,7 +55,7 @@ export function genSerializer (converter = []) {
 			if (!type) return value;
 			const conv = converter.find((c) => type === c.cls.name);
 			if (!conv) return value;
-			return conv.fromJSON(value.value);
+			return conv.unpack(value.value);
 		});
 	}
 

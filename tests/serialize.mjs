@@ -21,7 +21,7 @@ describe('genSerializer()', () => {
 		class MyType {
 			constructor (foo) { this.foo = foo; }
 		}
-		const {stringify, parse} = genSerializer([{cls: MyType, toJSON: (x) => x.foo, fromJSON: (x) => new MyType(x)}]);
+		const {stringify, parse} = genSerializer([{cls: MyType, pack: (x) => x.foo, unpack: (x) => new MyType(x)}]);
 
 		const src = {
 			myType: new MyType('bar'),
