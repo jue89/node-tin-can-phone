@@ -16,32 +16,53 @@ export const defaultTypes = [{
 	unpack: (x) => new Set(x),
 }];
 
+function isObj (x) {
+	return typeof x === 'object' && x !== null;
+}
+
 function isDict (x) {
-	return typeof x === 'object' && x !== null && !Array.isArray(x);
+	return isObj(x) && !Array.isArray(x);
 }
 
 export function genSerializer (converter = []) {
+	converter = converter.map((c) => {
+		return {
+			cls: c.cls,
+			pack: c.pack || c.cls.pack || ((x) => ({...x})),
+			unpack: c.unpack || c.cls.unpack || ((x) => Object.assign(new c.cls(), x)),
+		};
+	});
+
 	function tryPack (value) {
 		const conv = converter.find((c) => value instanceof c.cls);
-		if (!conv) return value;
-		return {
+		if (!conv) return [value, false];
+		return [{
 			type: conv.cls.name,
 			value: conv.pack(value)
-		};
+		}, true];
 	}
 
 	function stringify (obj, indent) {
 		return JSON.stringify(obj, (key, value) => {
-			/* We have to look inside the objects and arrays before JSON.stringify
-			 * calls the Classes toJSON() method instead of the given one ... */
-			if (isDict(value)) {
+			if (isObj(value)) {
+				/* We have to look inside the objects and arrays before JSON.stringify
+				 * calls the Classes toJSON() method instead of the given one ... */
+				if (Array.isArray(value)) {
+					return value.map((value) => {
+						const [packed] = tryPack(value);
+						return packed;
+					});
+				}
+
+				const [packed, matched] = tryPack(value);
+				if (matched) {
+					return packed;
+				}
+
 				return Object.fromEntries(Object.entries(value).map(([key, value]) => {
-					return [key, tryPack(value)];
+					const [packed] = tryPack(value);
+					return [key, packed];
 				}));
-			} else if (Array.isArray(value)) {
-				return value.map((value) => {
-					return tryPack(value);
-				});
 			} else {
 				return value;
 			}

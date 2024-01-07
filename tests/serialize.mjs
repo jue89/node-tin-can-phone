@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {describe, test} from 'node:test';
+import {Buffer} from 'node:buffer';
 import {genSerializer, defaultTypes} from '../serialize.mjs';
 
 describe('genSerializer()', () => {
@@ -17,11 +18,13 @@ describe('genSerializer()', () => {
 
 	});
 
-	test('serialize custom type', () => {
+	test('serialize custom type with explizit packing', () => {
 		class MyType {
+			static pack (x) { return x.foo; }
+			static unpack (x) { return new MyType(x); }
 			constructor (foo) { this.foo = foo; }
 		}
-		const {stringify, parse} = genSerializer([{cls: MyType, pack: (x) => x.foo, unpack: (x) => new MyType(x)}]);
+		const {stringify, parse} = genSerializer([{cls: MyType}]);
 
 		const src = {
 			myType: new MyType('bar'),
@@ -32,6 +35,35 @@ describe('genSerializer()', () => {
 		assert(dst.foo[0] instanceof MyType);
 		assert.deepEqual(src.myType, dst.myType);
 		assert.deepEqual(src.foo[0], dst.foo[0]);
+	});
+
+	test('serialize custom type with implizit packing', () => {
+		class MyType {
+			constructor (foo) { this.foo = foo; }
+		}
+		const {stringify, parse} = genSerializer([{cls: MyType}]);
+
+		const src = new MyType('foo');
+		const dst = parse(stringify(src));
+		assert(dst instanceof MyType);
+		assert.deepEqual(src, dst);
+	});
+
+	test('serialize with external packers', () => {
+		const {stringify, parse} = genSerializer([{
+			cls: Buffer,
+			pack: (x) => x.toString('hex'),
+			unpack: (x) => Buffer.from(x, 'hex')
+		}]);
+
+		const src = [Buffer.from('hello')];
+		const ser = stringify(src);
+		const parsedSer = JSON.parse(ser);
+		assert.equal(parsedSer[0].type, 'Buffer');
+		assert.equal(parsedSer[0].value, '68656c6c6f');
+		const dst = parse(ser);
+		assert(dst[0] instanceof Buffer);
+		assert.equal(dst[0].toString(), 'hello');
 	});
 });
 
