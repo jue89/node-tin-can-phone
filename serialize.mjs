@@ -30,7 +30,7 @@ export function genSerializer (converter = []) {
 		};
 	}
 
-	function stringify (obj) {
+	function stringify (obj, indent) {
 		return JSON.stringify(obj, (key, value) => {
 			/* We have to look inside the objects and arrays before JSON.stringify
 			 * calls the Classes toJSON() method instead of the given one ... */
@@ -45,7 +45,7 @@ export function genSerializer (converter = []) {
 			} else {
 				return value;
 			}
-		});
+		}, indent);
 	}
 
 	function parse (json) {
