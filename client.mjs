@@ -5,9 +5,14 @@ import {initSession} from './session.mjs';
 
 assert(WebSocket);
 
-export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onDisconnect}) {
+function genDefaultURL () {
+	return `${document.location.protocol.replace('http', 'ws')}//${document.location.host}`;
+}
+
+export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onDisconnect} = {}) {
 	const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
 
+	url ||= genDefaultURL();
 	const ws = new WebSocket(url);
 
 	// Setup close helper
