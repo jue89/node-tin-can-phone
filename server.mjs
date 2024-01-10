@@ -71,7 +71,7 @@ export class TinCanServer {
 			});
 
 			// Prepare startSession hook
-			const startSession = async ({proxy, onEvent, onDisconnect}) => {
+			const startSession = async ({proxy, onEvent, onDisconnect} = {}) => {
 				disconnectHandler = onDisconnect || (() => {});
 				session = {
 					...await initSession({
@@ -92,7 +92,8 @@ export class TinCanServer {
 			// Ask the connection handle to start the session
 			// Errors will terminate the session
 			try {
-				await onConnection({connection, startSession});
+				const obj = await onConnection({connection, startSession});
+				if (!session) await startSession(obj);
 			} catch (err) {
 				close();
 			}
