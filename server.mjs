@@ -4,6 +4,7 @@ import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
 import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
+import {EXT} from './types.mjs';
 
 const debug = debuglog('tincan');
 
@@ -40,9 +41,6 @@ export class TinCanServer {
 		wss.on('connection', async (ws, connection) => {
 			let session;
 
-			// Setup close helper
-			const close = () => ws.terminate();
-
 			// Setup messaging
 			const pipe = genBus();
 			ws.on('message', (msg) => {
@@ -56,10 +54,20 @@ export class TinCanServer {
 			const ingress = pipe.recv;
 			const outgress = (msg) => ws.send(stringify(msg));
 
+			// Setup close helper
+			const close = (msg) => {
+				outgress([EXT, msg]);
+				ws.terminate();
+			};
+
 			// Setup keep-alive
 			const pingTimeout = retriggerableTimeout(() => close, pingInterval * 3);
 			ws.on('pong', () => pingTimeout.reset());
 			const ping = abortableInterval(() => ws.ping(), pingInterval);
+
+			// Listen for last words from the client
+			let lastWords;
+			ingress([EXT], ([msg]) => { lastWords = msg; });
 
 			// Setup disconnect handler
 			let disconnectHandler = () => {};
@@ -67,7 +75,7 @@ export class TinCanServer {
 				this.sessions = this.sessions.filter((s) => s !== session);
 				pingTimeout.abort();
 				ping.stop();
-				disconnectHandler();
+				disconnectHandler(lastWords);
 			});
 
 			// Prepare startSession hook
@@ -95,7 +103,7 @@ export class TinCanServer {
 				const obj = await onConnection({connection, startSession});
 				if (!session) await startSession(obj);
 			} catch (err) {
-				close();
+				close(err);
 			}
 		});
 	}

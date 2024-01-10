@@ -5,7 +5,7 @@ const server = createServer();
 const tcs = new TinCanServer({server, onConnection: () => {
 	console.log('new session');
 	return {
-		onDisconnect: () => console.log('closed session'),
+		onDisconnect: (msg) => console.log('closed session', msg),
 		proxy: {
 			say: (x) => console.log('say', x),
 			echo: (x) => x,

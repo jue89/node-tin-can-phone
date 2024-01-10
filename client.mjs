@@ -2,6 +2,7 @@ import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
 import {defaultTypes, genSerializer} from './serialize.mjs';
 import {initSession} from './session.mjs';
+import {EXT} from './types.mjs';
 
 assert(WebSocket);
 
@@ -14,9 +15,6 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 
 	url ||= genDefaultURL();
 	const ws = new WebSocket(url);
-
-	// Setup close helper
-	const close = () => ws.close();
 
 	// Setup messaging
 	const pipe = genBus();
@@ -31,8 +29,19 @@ export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onD
 	const ingress = pipe.recv;
 	const outgress = (msg) => ws.send(stringify(msg));
 
+	// Setup close helper
+	const close = (msg) => {
+		outgress([EXT, msg]);
+		ws.close();
+	};
+
+	// Listen for last words
+	let lastWords;
+	ingress([EXT], ([x]) => { lastWords = x; });
+
 	// Setup disconnect handler
-	ws.addEventListener('close', () => onDisconnect && onDisconnect());
+	onDisconnect ||= () => {};
+	ws.addEventListener('close', () => onDisconnect(lastWords));
 
 	const session = await initSession({
 		isServer: false,

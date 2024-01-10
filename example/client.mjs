@@ -6,4 +6,4 @@ const session = await connectTinCan({
 
 await session.call.say(await session.call.echo('hi'));
 
-session.close();
+session.close('tschööö');
