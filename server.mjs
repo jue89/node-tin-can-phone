@@ -2,7 +2,7 @@ import {WebSocketServer} from 'ws';
 import {debuglog} from 'node:util';
 import assert from './assert.mjs';
 import {genBus} from './bus.mjs';
-import {defaultTypes, genSerializer} from './serialize.mjs';
+import {jsonSerializer} from 'packaging-tape';
 import {initSession} from './session.mjs';
 import {EXT} from './types.mjs';
 
@@ -35,7 +35,7 @@ export class TinCanServer {
 
 		this.sessions = [];
 
-		const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
+		const {parse, stringify} = jsonSerializer({customTypes});
 
 		const wss = new WebSocketServer({server});
 		wss.on('connection', async (ws, connection) => {

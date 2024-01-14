@@ -1,14 +1,14 @@
 import {WebSocket} from 'ws';
 import {debuglog} from 'node:util';
 import {genBus} from './bus.mjs';
-import {defaultTypes, genSerializer} from './serialize.mjs';
+import {jsonSerializer} from 'packaging-tape';
 import {initSession} from './session.mjs';
 import {EXT} from './types.mjs';
 
 const debug = debuglog('tincan');
 
 export async function connectTinCan ({url, customTypes = [], onEvent, proxy, onDisconnect}) {
-	const {parse, stringify} = genSerializer([...defaultTypes, ...customTypes]);
+	const {parse, stringify} = jsonSerializer({customTypes});
 
 	const ws = new WebSocket(url);
 
