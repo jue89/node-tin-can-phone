@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/jue89/node-tin-can-phone/compare/v0.2.0...v0.2.1) (2024-03-19)
+
+
+### Bug Fixes
+
+* **events:** don't detach listener accidentially ([0ac7263](https://github.com/jue89/node-tin-can-phone/commit/0ac7263a499920506489823f9c2e6196cccbe5df))
+
 ## 0.2.0 (2024-01-15)
 
 
