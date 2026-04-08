@@ -29,7 +29,7 @@ function abortableInterval (fn, interval) {
 }
 
 export class TinCanServer {
-	constructor ({server, customTypes = [], onConnection, pingInterval = 30000}) {
+	constructor ({server, verifyClient, customTypes = [], onConnection, pingInterval = 30000}) {
 		assert(typeof server === 'object', 'server must be a Server instance');
 		assert(typeof onConnection === 'function', 'onConnection must be a function');
 
@@ -37,8 +37,8 @@ export class TinCanServer {
 
 		const {parse, stringify} = jsonSerializer({customTypes});
 
-		const wss = new WebSocketServer({server});
-		wss.on('connection', async (ws, connection) => {
+		this.wss = new WebSocketServer({server, noServer: server === undefined, verifyClient});
+		this.wss.on('connection', async (ws, connection) => {
 			let session;
 
 			// Setup messaging
