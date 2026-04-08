@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/jue89/node-tin-can-phone/compare/v0.2.1...v0.3.0) (2026-04-08)
+
+
+### Features
+
+* **server:** control client verification ([8fcd6cf](https://github.com/jue89/node-tin-can-phone/commit/8fcd6cf1ed2b85e8d05ccac005417c9968d6ec10))
+
 ### [0.2.1](https://github.com/jue89/node-tin-can-phone/compare/v0.2.0...v0.2.1) (2024-03-19)
 
 
